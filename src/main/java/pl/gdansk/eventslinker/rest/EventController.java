@@ -2,6 +2,7 @@ package pl.gdansk.eventslinker.rest;
 
 import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -39,8 +40,8 @@ public class EventController {
 	@GetMapping()
 	public ResponseEntity<CalendarEventsResponse> getEvents(
 			@ValidDate @RequestParam(value = "fromDate") String fromDate,
-			@CountryCode @RequestParam(value = "cc1", defaultValue = "polish") String cc1,
-			@CountryCode @RequestParam(value = "cc2", defaultValue = "austrian") String cc2) {
+			@CountryCode @RequestParam(value = "cc1", defaultValue = "pl") String cc1,
+			@CountryCode @RequestParam(value = "cc2", defaultValue = "at") String cc2) {
 		final LocalDate oneDayAfter = DateValidator.parse(fromDate).get().plusDays(1);
 
 		CalendarName calendar1 = CalendarName.valueOf(cc1.toUpperCase());
@@ -50,7 +51,9 @@ public class EventController {
 		final CompletableFuture<TreeMultimap<LocalDate, CalendarEvent>> events2 = googleCalendar.getEvents(calendar2, oneDayAfter);
 
 		var combineEvents = this.createResponse(oneDayAfter);
-		return events1.thenCombine(events2, combineEvents).join();
+		return events1.thenCombine(events2, combineEvents)
+				.orTimeout(30, TimeUnit.SECONDS)
+				.join();
 	}
 
 	private BiFunction<TreeMultimap<LocalDate, CalendarEvent>, TreeMultimap<LocalDate, CalendarEvent>,

@@ -15,7 +15,7 @@ public class CountryCodeValidator implements ConstraintValidator<CountryCode, St
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return Objects.nonNull(value) && value.length() == 2 && mapper.apply(value).isPresent();
+		return Objects.nonNull(value) && mapper.apply(value).isPresent();
 	}
 
 }
