@@ -17,6 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.google.common.collect.TreeMultimap;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import pl.gdansk.eventslinker.domain.CalendarEvent;
 import pl.gdansk.eventslinker.domain.CalendarEventsResponse;
 import pl.gdansk.eventslinker.domain.CalendarName;
@@ -27,7 +32,7 @@ import pl.gdansk.eventslinker.validator.ValidDate;
 
 @RestController
 @Validated
-@RequestMapping(path = "/events",
+@RequestMapping(path = "/api",
 		produces = "application/json")
 public class EventController {
 
@@ -37,7 +42,28 @@ public class EventController {
 		this.googleCalendar = googleCalendar;
 	}
 
-	@GetMapping()
+	@Operation(summary = "Find event within the same date from two different countries")
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "Event found",
+					content = {
+							@Content(mediaType = "application/json",
+									schema = @Schema(implementation = CalendarEventsResponse.class)
+							)
+					}),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Event not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "503",
+					description = "Cannot connect with calendar",
+					content = @Content
+			)
+	})
+	@GetMapping(path = "/events")
 	public ResponseEntity<CalendarEventsResponse> getEvents(
 			@ValidDate @RequestParam(value = "fromDate") String fromDate,
 			@CountryCode @RequestParam(value = "cc1", defaultValue = "pl") String cc1,

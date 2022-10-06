@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.http.HttpStatus;
@@ -66,7 +67,7 @@ public class GoogleCalendar {
 			Events eventList = getEvents(calendar, startDate, pageToken);
 			pageToken = eventList.getNextPageToken();
 
-			Logger.getGlobal().info("Events: " + eventList.getItems());
+			Logger.getGlobal().log(Level.CONFIG, "Events: " + eventList.getItems());
 			events.putAll(eventMapper.apply(eventList.getItems()));
 		} while (!Strings.isNullOrEmpty(pageToken));
 
